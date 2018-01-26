@@ -34,6 +34,7 @@ def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
     num = scene_info[7]
 
     info = {
+        'sat': 'S2A',
         'path': scene_path,
         'utm_zone': scene_info[1],
         'latitude_band': latitude_band,
