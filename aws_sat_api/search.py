@@ -151,7 +151,7 @@ def sentinel2(utm, lat, grid, full=False, level='l1c'):
     s2_bucket = f'{sentinel_bucket}-{level}'
     request_pays = True if level == 'l2a' else False
 
-    current_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(timezone.utc).year + 1
     years = range(2015, current_year)
 
     utm = str(utm).lstrip('0')
