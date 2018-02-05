@@ -50,9 +50,9 @@ def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
         data = json.loads(aws.get_object(bucket, f'{scene_path}tileInfo.json', s3=s3, request_pays=request_pays))
         sat_name = data['productName'][0:3]
         info['sat'] = sat_name
-        info['geometry'] = data['tileGeometry']
-        info['coverage'] = data['dataCoveragePercentage']
-        info['cloud_coverage'] = data['cloudyPixelPercentage']
+        info['geometry'] = data.get('tileGeometry')
+        info['coverage'] = data.get('dataCoveragePercentage')
+        info['cloud_coverage'] = data.get('cloudyPixelPercentage')
         info['scene_id'] = f'{sat_name}_tile_{acquisition_date}_{utm}{latitude_band}{grid_square}_{num}'
 
     return info
