@@ -138,6 +138,7 @@ def cbers(path, row):
         scene_key = info["key"]
         preview_id = '_'.join(scene_id.split('_')[0:-1])
         info['thumbURL'] = f'https://s3.amazonaws.com/{cbers_bucket}/{scene_key}/{preview_id}_small.jpeg'
+        info['browseURL'] = f'https://s3.amazonaws.com/{cbers_bucket}/{scene_key}/{preview_id}.jpg'
         results.append(info)
 
     return results

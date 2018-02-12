@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.0.4
+-----
+- add CBERS-4 Browse url
+
 0.0.3
 -----
 - fix function failure when missing info in Sentinel-2 tileInfo.json

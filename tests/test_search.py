@@ -353,6 +353,8 @@ def test_cbers_valid(list_directory, session):
         'sensor': 'MUX',
         'thumbURL':
             'https://s3.amazonaws.com/cbers-meta-pds/CBERS4/MUX/217/063/CBERS_4_MUX_20160416_217_063_L2/CBERS_4_MUX_20160416_217_063_small.jpeg',
+        'browseURL':
+            'https://s3.amazonaws.com/cbers-meta-pds/CBERS4/MUX/217/063/CBERS_4_MUX_20160416_217_063_L2/CBERS_4_MUX_20160416_217_063.jpg',
         'version': '4'}]
 
     assert list(search.cbers(path, row)) == expected
