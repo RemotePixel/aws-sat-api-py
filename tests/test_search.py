@@ -6,6 +6,7 @@ from io import BytesIO
 from mock import patch
 
 from aws_sat_api import search
+from botocore.exceptions import ClientError
 
 
 @patch('aws_sat_api.aws.get_object')
@@ -71,6 +72,35 @@ def test_get_s2_info_validFull(get_object):
         'path': 'tiles/38/S/NG/2017/10/9/1/',
         'sat': 'S2B',
         'scene_id': 'S2B_tile_20171009_38SNG_1',
+        'utm_zone': '38'}
+
+    assert search.get_s2_info(bucket, scene_path, full, s3, request_pays) == expected
+    get_object.assert_called_once()
+
+
+@patch('aws_sat_api.aws.get_object')
+def test_get_s2_info_botoError(get_object):
+    """Should work as expected
+    """
+
+    get_object.side_effect = ClientError(
+        {'Error': {'Code': 500, 'Message': 'Error'}}, 'get_object')
+
+    bucket = 'sentinel-s2-l1c'
+    scene_path = 'tiles/38/S/NG/2017/10/9/1/'
+    full = True
+    s3 = None
+    request_pays = False
+
+    expected = {
+        'acquisition_date': '20171009',
+        'browseURL': 'https://sentinel-s2-l1c.s3.amazonaws.com/tiles/38/S/NG/2017/10/9/1/preview.jpg',
+        'grid_square': 'NG',
+        'latitude_band': 'S',
+        'num': '1',
+        'path': 'tiles/38/S/NG/2017/10/9/1/',
+        'sat': 'S2A',
+        'scene_id': 'S2A_tile_20171009_38SNG_1',
         'utm_zone': '38'}
 
     assert search.get_s2_info(bucket, scene_path, full, s3, request_pays) == expected
@@ -194,6 +224,40 @@ def test_get_l8_info_validFull(get_object):
         'sensor': 'C',
         'sun_azimuth': -115.79513548,
         'sun_elevation': 16.11011632,
+        'thumbURL':
+            'https://landsat-pds.s3.amazonaws.com/L8/178/246/LC81782462014232LGN00/LC81782462014232LGN00_thumb_small.jpg'}
+
+    assert search.get_l8_info(scene_id, full, s3) == expected
+    get_object.assert_called_once()
+
+
+@patch('aws_sat_api.aws.get_object')
+def test_get_l8_info_botoError(get_object):
+    """Should work as expected
+    """
+
+    get_object.side_effect = ClientError(
+        {'Error': {'Code': 500, 'Message': 'Error'}}, 'get_object')
+
+    scene_id = 'LC81782462014232LGN00'
+    full = True
+    s3 = None
+
+    expected = {
+        'acquisitionJulianDay': '232',
+        'acquisitionYear': '2014',
+        'acquisition_date': '20140820',
+        'archiveVersion': '00',
+        'browseURL':
+            'https://landsat-pds.s3.amazonaws.com/L8/178/246/LC81782462014232LGN00/LC81782462014232LGN00_thumb_large.jpg',
+        'category': 'pre',
+        'groundStationIdentifier': 'LGN',
+        'key': 'L8/178/246/LC81782462014232LGN00/LC81782462014232LGN00',
+        'path': '178',
+        'row': '246',
+        'satellite': 'L8',
+        'scene_id': 'LC81782462014232LGN00',
+        'sensor': 'C',
         'thumbURL':
             'https://landsat-pds.s3.amazonaws.com/L8/178/246/LC81782462014232LGN00/LC81782462014232LGN00_thumb_small.jpg'}
 

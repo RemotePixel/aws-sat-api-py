@@ -1,5 +1,8 @@
 Changelog
 =========
+0.0.5
+-----
+- do not error when not mtl or tileInfo file are missing
 
 0.0.4
 -----

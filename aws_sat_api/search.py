@@ -47,13 +47,16 @@ def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
     info['scene_id'] = f'S2A_tile_{acquisition_date}_{utm}{latitude_band}{grid_square}_{num}'
 
     if full:
-        data = json.loads(aws.get_object(bucket, f'{scene_path}tileInfo.json', s3=s3, request_pays=request_pays))
-        sat_name = data['productName'][0:3]
-        info['sat'] = sat_name
-        info['geometry'] = data.get('tileGeometry')
-        info['coverage'] = data.get('dataCoveragePercentage')
-        info['cloud_coverage'] = data.get('cloudyPixelPercentage')
-        info['scene_id'] = f'{sat_name}_tile_{acquisition_date}_{utm}{latitude_band}{grid_square}_{num}'
+        try:
+            data = json.loads(aws.get_object(bucket, f'{scene_path}tileInfo.json', s3=s3, request_pays=request_pays))
+            sat_name = data['productName'][0:3]
+            info['sat'] = sat_name
+            info['geometry'] = data.get('tileGeometry')
+            info['coverage'] = data.get('dataCoveragePercentage')
+            info['cloud_coverage'] = data.get('cloudyPixelPercentage')
+            info['scene_id'] = f'{sat_name}_tile_{acquisition_date}_{utm}{latitude_band}{grid_square}_{num}'
+        except:
+            print(f'Could not get info from {scene_path}tileInfo.json')
 
     return info
 
@@ -69,23 +72,26 @@ def get_l8_info(scene_id, full=False, s3=None):
     info['thumbURL'] = f'{aws_url}/{scene_key}_thumb_small.jpg'
 
     if full:
-        data = json.loads(aws.get_object(landsat_bucket, f'{scene_key}_MTL.json', s3=s3))
-        image_attr = data['L1_METADATA_FILE']['IMAGE_ATTRIBUTES']
-        prod_meta = data['L1_METADATA_FILE']['PRODUCT_METADATA']
+        try:
+            data = json.loads(aws.get_object(landsat_bucket, f'{scene_key}_MTL.json', s3=s3))
+            image_attr = data['L1_METADATA_FILE']['IMAGE_ATTRIBUTES']
+            prod_meta = data['L1_METADATA_FILE']['PRODUCT_METADATA']
 
-        info['sun_azimuth'] = image_attr.get('SUN_AZIMUTH')
-        info['sun_elevation'] = image_attr.get('SUN_ELEVATION')
-        info['cloud_coverage'] = image_attr.get('CLOUD_COVER')
-        info['cloud_coverage_land'] = image_attr.get('CLOUD_COVER_LAND')
-        info['geometry'] = {
-            'type': 'Polygon',
-            'coordinates': [[
-                [prod_meta['CORNER_UR_LON_PRODUCT'], prod_meta['CORNER_UR_LAT_PRODUCT']],
-                [prod_meta['CORNER_UL_LON_PRODUCT'], prod_meta['CORNER_UL_LAT_PRODUCT']],
-                [prod_meta['CORNER_LL_LON_PRODUCT'], prod_meta['CORNER_LL_LAT_PRODUCT']],
-                [prod_meta['CORNER_LR_LON_PRODUCT'], prod_meta['CORNER_LR_LAT_PRODUCT']],
-                [prod_meta['CORNER_UR_LON_PRODUCT'], prod_meta['CORNER_UR_LAT_PRODUCT']]
-            ]]}
+            info['sun_azimuth'] = image_attr.get('SUN_AZIMUTH')
+            info['sun_elevation'] = image_attr.get('SUN_ELEVATION')
+            info['cloud_coverage'] = image_attr.get('CLOUD_COVER')
+            info['cloud_coverage_land'] = image_attr.get('CLOUD_COVER_LAND')
+            info['geometry'] = {
+                'type': 'Polygon',
+                'coordinates': [[
+                    [prod_meta['CORNER_UR_LON_PRODUCT'], prod_meta['CORNER_UR_LAT_PRODUCT']],
+                    [prod_meta['CORNER_UL_LON_PRODUCT'], prod_meta['CORNER_UL_LAT_PRODUCT']],
+                    [prod_meta['CORNER_LL_LON_PRODUCT'], prod_meta['CORNER_LL_LAT_PRODUCT']],
+                    [prod_meta['CORNER_LR_LON_PRODUCT'], prod_meta['CORNER_LR_LAT_PRODUCT']],
+                    [prod_meta['CORNER_UR_LON_PRODUCT'], prod_meta['CORNER_UR_LAT_PRODUCT']]
+                ]]}
+        except:
+            print(f'Could not get info from {scene_key}_MTL.json')
 
     return info
 
