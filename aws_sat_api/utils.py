@@ -72,7 +72,7 @@ def landsat_parse_scene_id(sceneid):
 def cbers_parse_scene_id(sceneid):
     """Parse CBERS scene id"""
 
-    if not re.match('^CBERS_4_MUX_[0-9]{8}_[0-9]{3}_[0-9]{3}_L[0-9]$', sceneid):
+    if not re.match('^CBERS_4_\w+_[0-9]{8}_[0-9]{3}_[0-9]{3}_L[0-9]$', sceneid):
         raise InvalidCBERSSceneId('Could not match {}'.format(sceneid))
 
     cbers_pattern = (
@@ -80,7 +80,7 @@ def cbers_parse_scene_id(sceneid):
         r'_'
         r'(?P<version>[0-9]{1})'
         r'_'
-        r'(?P<sensor>\w{3})'
+        r'(?P<sensor>\w+)'
         r'_'
         r'(?P<acquisition_date>[0-9]{4}[0-9]{2}[0-9]{2})'
         r'_'
@@ -96,10 +96,9 @@ def cbers_parse_scene_id(sceneid):
         meta = match.groupdict()
 
     meta['scene_id'] = sceneid
-    meta['key'] = 'CBERS4/MUX/{}/{}/{}'.format(meta['path'], meta['row'], sceneid)
+    meta['key'] = 'CBERS4/{}/{}/{}/{}'.format(meta['sensor'], meta['path'], meta['row'], sceneid)
 
     return meta
-
 
 def zeroPad(n, l):
     """ Add leading 0

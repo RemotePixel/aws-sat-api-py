@@ -28,7 +28,8 @@ l8_meta = landsat(l8_path, l8_row, full_search)
 
 cbers_path = 178
 cbers_row = 80
-cbers_meta = cbers(cbers_path, cbers_row)
+cbers_sensor = 'MUX'
+cbers_meta = cbers(cbers_path, cbers_row, sensor)
 
 
 utm = 16

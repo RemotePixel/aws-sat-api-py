@@ -81,7 +81,6 @@ def test_cbers_id_invalid():
     with pytest.raises(InvalidCBERSSceneId):
         utils.cbers_parse_scene_id(scene)
 
-
 def test_cbers_id_valid():
     """
     Should work as expected (parse cbers scene id)
@@ -97,6 +96,20 @@ def test_cbers_id_valid():
         'row': '094',
         'version': '4',
         'scene_id': 'CBERS_4_MUX_20171121_057_094_L2',
+        'satellite': 'CBERS'}
+
+    assert utils.cbers_parse_scene_id(scene) == expected_content
+
+    scene = 'CBERS_4_AWFI_20171121_057_094_L2'
+    expected_content = {
+        'acquisition_date': '20171121',
+        'sensor': 'AWFI',
+        'key': 'CBERS4/AWFI/057/094/CBERS_4_AWFI_20171121_057_094_L2',
+        'path': '057',
+        'processing_level': 'L2',
+        'row': '094',
+        'version': '4',
+        'scene_id': 'CBERS_4_AWFI_20171121_057_094_L2',
         'satellite': 'CBERS'}
 
     assert utils.cbers_parse_scene_id(scene) == expected_content

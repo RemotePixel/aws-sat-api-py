@@ -395,11 +395,12 @@ def test_landsat_validFull(list_directory, session):
 
 @patch('aws_sat_api.search.boto3_session')
 @patch('aws_sat_api.aws.list_directory')
-def test_cbers_valid(list_directory, session):
+def test_cbers_mux_valid(list_directory, session):
     """Should work as expected
     """
 
     session.return_value.client.return_value = True
+
     list_directory.return_value = [
         'CBERS4/MUX/217/063/CBERS_4_MUX_20160416_217_063_L2/']
 
@@ -422,3 +423,35 @@ def test_cbers_valid(list_directory, session):
         'version': '4'}]
 
     assert list(search.cbers(path, row)) == expected
+
+@patch('aws_sat_api.search.boto3_session')
+@patch('aws_sat_api.aws.list_directory')
+def test_cbers_awfi_valid(list_directory, session):
+    """Should work as expected
+    """
+
+    session.return_value.client.return_value = True
+
+    list_directory.return_value = [
+        'CBERS4/AWFI/123/093/CBERS_4_AWFI_20170411_123_093_L4/']
+
+    path = '123'
+    row = '93'
+    sensor = 'AWFI'
+
+    expected = [{
+        'acquisition_date': '20170411',
+        'key': 'CBERS4/AWFI/123/093/CBERS_4_AWFI_20170411_123_093_L4',
+        'path': '123',
+        'processing_level': 'L4',
+        'row': '093',
+        'satellite': 'CBERS',
+        'scene_id': 'CBERS_4_AWFI_20170411_123_093_L4',
+        'sensor': 'AWFI',
+        'thumbURL':
+            'https://s3.amazonaws.com/cbers-meta-pds/CBERS4/AWFI/123/093/CBERS_4_AWFI_20170411_123_093_L4/CBERS_4_AWFI_20170411_123_093_small.jpeg',
+        'browseURL':
+            'https://s3.amazonaws.com/cbers-meta-pds/CBERS4/AWFI/123/093/CBERS_4_AWFI_20170411_123_093_L4/CBERS_4_AWFI_20170411_123_093.jpg',
+        'version': '4'}]
+
+    assert list(search.cbers(path, row, sensor)) == expected

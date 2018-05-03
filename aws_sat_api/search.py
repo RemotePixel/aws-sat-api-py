@@ -124,14 +124,15 @@ def landsat(path, row, full=False):
     return results
 
 
-def cbers(path, row):
+def cbers(path, row, sensor='MUX'):
     """
+    Valid values for sensor are: 'MUX', 'AWFI', 'PAN5M' and 'PAN10M'.
     """
 
     path = utils.zeroPad(path, 3)
     row = utils.zeroPad(row, 3)
 
-    prefix = f'CBERS4/MUX/{path}/{row}/'
+    prefix = f'CBERS4/{sensor}/{path}/{row}/'
 
     session = boto3_session(region_name=region)
     s3 = session.client('s3')
