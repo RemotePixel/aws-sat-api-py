@@ -1,5 +1,9 @@
 Changelog
 =========
+1.0.0
+-----
+- Including support for CBERS-4 AWFI, PAN10M and PAN5M sensors (fredliporace)
+
 0.0.5
 -----
 - do not error when not mtl or tileInfo file are missing
