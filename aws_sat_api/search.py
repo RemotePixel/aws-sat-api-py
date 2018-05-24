@@ -1,4 +1,4 @@
-"""aws_sat_api.search"""
+"""Search handlers."""
 
 import os
 import json
@@ -12,6 +12,7 @@ from boto3.session import Session as boto3_session
 from aws_sat_api import utils, aws
 
 region = os.environ.get('AWS_REGION', 'us-east-1')
+max_worker = os.environ.get('MAX_WORKER', 50)
 
 landsat_bucket = 'landsat-pds'
 cbers_bucket = 'cbers-meta-pds'
@@ -19,9 +20,7 @@ sentinel_bucket = 'sentinel-s2'
 
 
 def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
-    """return Sentinel metadata
-    """
-
+    """Return Sentinel metadata."""
     scene_info = scene_path.split('/')
 
     year = scene_info[4]
@@ -62,9 +61,7 @@ def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
 
 
 def get_l8_info(scene_id, full=False, s3=None):
-    """return Landsat-8 metadata
-    """
-
+    """Return Landsat-8 metadata."""
     info = utils.landsat_parse_scene_id(scene_id)
     aws_url = f'https://{landsat_bucket}.s3.amazonaws.com'
     scene_key = info["key"]
@@ -97,9 +94,7 @@ def get_l8_info(scene_id, full=False, s3=None):
 
 
 def landsat(path, row, full=False):
-    """
-    """
-
+    """Get Landsat scenes."""
     path = utils.zeroPad(path, 3)
     row = utils.zeroPad(row, 3)
 
@@ -118,17 +113,17 @@ def landsat(path, row, full=False):
     scene_ids = [os.path.basename(key.strip('/')) for key in results]
 
     _info_worker = partial(get_l8_info, full=full, s3=s3)
-    with futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_info_worker, scene_ids)
 
     return results
 
 
 def cbers(path, row, sensor='MUX'):
-    """
+    """Get CBERS scenes.
+
     Valid values for sensor are: 'MUX', 'AWFI', 'PAN5M' and 'PAN10M'.
     """
-
     path = utils.zeroPad(path, 3)
     row = utils.zeroPad(row, 3)
 
@@ -152,12 +147,12 @@ def cbers(path, row, sensor='MUX'):
 
 
 def sentinel2(utm, lat, grid, full=False, level='l1c'):
-
+    """Get Sentinel scenes."""
     if level not in ['l1c', 'l2a']:
         raise Exception('Sentinel 2 Level must be "l1c" or "l2a"')
 
     s2_bucket = f'{sentinel_bucket}-{level}'
-    request_pays = True if level == 'l2a' else False
+    request_pays = True
 
     current_year = datetime.now(timezone.utc).year + 1
     years = range(2015, current_year)
@@ -171,22 +166,22 @@ def sentinel2(utm, lat, grid, full=False, level='l1c'):
     s3 = session.client('s3')
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
-    with futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_ls_worker, prefixes)
         months_dirs = itertools.chain.from_iterable(results)
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
-    with futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_ls_worker, months_dirs)
         days_dirs = itertools.chain.from_iterable(results)
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
-    with futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_ls_worker, days_dirs)
         version_dirs = itertools.chain.from_iterable(results)
 
     _info_worker = partial(get_s2_info, s2_bucket, full=full, s3=s3, request_pays=request_pays)
-    with futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_info_worker, version_dirs)
 
     return results

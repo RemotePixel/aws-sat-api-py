@@ -1,4 +1,4 @@
-"""aws_sat_api.aws"""
+"""AWS S3 functions."""
 
 import os
 
@@ -8,8 +8,7 @@ region = os.environ.get('AWS_REGION', 'us-east-1')
 
 
 def list_directory(bucket, prefix, s3=None, request_pays=False):
-    """AWS s3 list directory
-    """
+    """AWS s3 list directory."""
     if not s3:
         session = boto3_session(region_name=region)
         s3 = session.client('s3')
@@ -33,8 +32,7 @@ def list_directory(bucket, prefix, s3=None, request_pays=False):
 
 
 def get_object(bucket, key, s3=None, request_pays=False):
-    """AWS s3 get object content
-    """
+    """AWS s3 get object content."""
     if not s3:
         session = boto3_session(region_name=region)
         s3 = session.client('s3')

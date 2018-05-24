@@ -1,4 +1,4 @@
-"""aws_sat_api.utils"""
+"""utility functions."""
 
 import os
 import re
@@ -8,7 +8,8 @@ from aws_sat_api.errors import (InvalidLandsatSceneId, InvalidCBERSSceneId)
 
 
 def landsat_parse_scene_id(sceneid):
-    """Parse Landsat-8 scene id
+    """Parse Landsat-8 scene id.
+
     Author @perrygeo - http://www.perrygeo.com
     """
     pre_collection = r'(L[COTEM]8\d{6}\d{7}[A-Z]{3}\d{2})'
@@ -70,8 +71,7 @@ def landsat_parse_scene_id(sceneid):
 
 
 def cbers_parse_scene_id(sceneid):
-    """Parse CBERS scene id"""
-
+    """Parse CBERS scene id."""
     if not re.match('^CBERS_4_\w+_[0-9]{8}_[0-9]{3}_[0-9]{3}_L[0-9]$', sceneid):
         raise InvalidCBERSSceneId('Could not match {}'.format(sceneid))
 
@@ -101,6 +101,5 @@ def cbers_parse_scene_id(sceneid):
     return meta
 
 def zeroPad(n, l):
-    """ Add leading 0
-    """
+    """ Add leading 0."""
     return str(n).zfill(l)
