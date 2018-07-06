@@ -146,16 +146,32 @@ def cbers(path, row, sensor='MUX'):
     return results
 
 
-def sentinel2(utm, lat, grid, full=False, level='l1c'):
-    """Get Sentinel scenes."""
+def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None, end_date: datetime=None):
+    """Get Sentinel scenes.
+
+    :param start_date: Start date in UTC.
+    :param end_date: End date in UTC.
+    """
     if level not in ['l1c', 'l2a']:
         raise Exception('Sentinel 2 Level must be "l1c" or "l2a"')
 
     s2_bucket = f'{sentinel_bucket}-{level}'
     request_pays = True
 
-    current_year = datetime.now(timezone.utc).year + 1
-    years = range(2015, current_year)
+    start_date = start_date or datetime(2015, 1, 1)
+    end_date = end_date or datetime.now(timezone.utc)
+
+    # Converts the time zone or sets a new tz for naive objects.
+    start_date = start_date.astimezone(timezone.utc)
+    end_date = end_date.astimezone(timezone.utc)
+
+    if start_date > end_date:
+        raise ValueError("Invalid date range (start_date > end_date).")
+
+    if start_date.year < 2015:
+        raise ValueError(f"Start date out of range {start_date.year} < 2015.")
+
+    years = range(start_date.year, end_date.year + 1)
 
     utm = str(utm).lstrip('0')
 
@@ -169,6 +185,26 @@ def sentinel2(utm, lat, grid, full=False, level='l1c'):
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_ls_worker, prefixes)
         months_dirs = itertools.chain.from_iterable(results)
+
+    # This is a little bit of a hack, but works.
+    # In the future we can optimize this process by making special queries for
+    # the start and end years.
+
+    # Del unwanted months from the start and end years.
+    to_pop = []  # We will remove them later to avoid problems...
+    for index, item in enumerate(months_dirs):
+        split_item = item.split("/")
+        if split_item[4] == start_date.year:
+            if split_item[5] < start_date.month:
+                to_pop.append(index)
+        elif split_item[4] == end_date.year:
+            if split_item[5] > end_date.month:
+                to_pop.append(index)
+    for index in to_pop:
+        del months_dirs[index]
+
+    import sys
+    sys.exit()
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
@@ -185,3 +221,7 @@ def sentinel2(utm, lat, grid, full=False, level='l1c'):
         results = executor.map(_info_worker, version_dirs)
 
     return results
+
+
+if __name__ == '__main__':
+    sentinel2(22, "K", "HV")
