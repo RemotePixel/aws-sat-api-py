@@ -203,7 +203,7 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
     selected_days = []
     for item in days_dirs:
         item_date = datetime(*[int(i) for i in item.split("/")[4:7]], tzinfo=timezone.utc)
-        if start_date < item_date < end_date:
+        if start_date <= item_date <= end_date:
             selected_days.append(item)
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)

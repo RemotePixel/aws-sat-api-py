@@ -459,16 +459,7 @@ def test_cbers_awfi_valid(list_directory, session):
 
 
 def test_s2_date_filter():
-    # results_no_filter = list(search.sentinel2(22, "K", "HV"))
-    # assert len(results_no_filter) == 221
-
     start_date = datetime(2017, 1, 1)
     end_date = datetime(2017, 5, 15)
     results_date_filter = list(search.sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date))
-
-    print(len(results_date_filter))
-    assert len(results_date_filter) == 10
-
-
-if __name__ == '__main__':
-    test_s2_date_filter()
+    assert len(results_date_filter) == 22
