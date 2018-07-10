@@ -149,7 +149,7 @@ def cbers(path, row, sensor='MUX'):
 
 def sentinel2(utm: Union[str, int], lat: str, grid: str,
               full: bool=False, level: str='l1c',
-              start_date: Union[date, datetime]=None, end_date: Union[date, datetime]=None):
+              start_date: datetime=None, end_date: datetime=None):
     """Get Sentinel 2 scenes.
 
     :param utm: Grid zone designator.
@@ -194,42 +194,16 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
         results = executor.map(_ls_worker, prefixes)
         months_dirs = itertools.chain.from_iterable(results)
 
-    # In the future we can optimize this process by making separate queries for
-    # the start and end years.
-    selected_months = []
-    for item in months_dirs:
-        split_item = item.split("/")
-        if int(split_item[4]) == start_date.year:
-            if int(split_item[5]) >= start_date.month:
-                selected_months.append(item)
-        elif int(split_item[4]) == end_date.year:
-            if int(split_item[5]) <= end_date.month:
-                selected_months.append(item)
-        else:
-            selected_months.append(item)
-
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
-        results = executor.map(_ls_worker, selected_months)
+        results = executor.map(_ls_worker, months_dirs)
         days_dirs = itertools.chain.from_iterable(results)
 
-    # Similar process here.
+    # Now, filter by date intervals.
     selected_days = []
     for item in days_dirs:
-        split_item = item.split("/")
-        if int(split_item[4]) == start_date.year:
-            if int(split_item[5]) > start_date.month:
-                selected_days.append(item)
-            elif int(split_item[5]) == start_date.month:
-                if int(split_item[6]) >= start_date.day:
-                    selected_days.append(item)
-        elif int(split_item[4]) == end_date.year:
-            if int(split_item[5]) < end_date.month:
-                selected_days.append(item)
-            elif int(split_item[5]) == end_date.month:
-                if int(split_item[6]) <= end_date.day:
-                    selected_days.append(item)
-        else:
+        item_date = datetime(*[int(i) for i in item.split("/")[4:7]], tzinfo=timezone.utc)
+        if start_date < item_date < end_date:
             selected_days.append(item)
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
@@ -242,3 +216,14 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
         results = executor.map(_info_worker, version_dirs)
 
     return results
+
+
+if __name__ == '__main__':
+    import timeit
+
+    def timing_func():
+        start_date = datetime(2017, 1, 1)
+        end_date = datetime(2017, 5, 15)
+        sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date)
+    t = timeit.timeit('timing_func()', number=10, setup="from __main__ import timing_func")
+    print(t)
