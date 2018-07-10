@@ -3,6 +3,7 @@
 import os
 import json
 import itertools
+import timeit
 from functools import partial
 from concurrent import futures
 from datetime import datetime, timezone
@@ -187,33 +188,44 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
         months_dirs = itertools.chain.from_iterable(results)
 
     # This is a little bit of a hack, but works.
-    # In the future we can optimize this process by making special queries for
+    # In the future we can optimize this process by making separate queries for
     # the start and end years.
 
-    # Del unwanted months from the start and end years.
-    to_pop = []  # We will remove them later to avoid problems...
-    for index, item in enumerate(months_dirs):
+    selected_months = []
+    for item in months_dirs:
         split_item = item.split("/")
-        if split_item[4] == start_date.year:
-            if split_item[5] < start_date.month:
-                to_pop.append(index)
-        elif split_item[4] == end_date.year:
-            if split_item[5] > end_date.month:
-                to_pop.append(index)
-    for index in to_pop:
-        del months_dirs[index]
-
-    import sys
-    sys.exit()
+        if int(split_item[4]) == start_date.year:
+            if int(split_item[5]) >= start_date.month:
+                selected_months.append(item)
+        elif int(split_item[4]) == end_date.year:
+            if int(split_item[5]) <= end_date.month:
+                selected_months.append(item)
+        else:
+            selected_months.append(item)
 
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
-        results = executor.map(_ls_worker, months_dirs)
+        results = executor.map(_ls_worker, selected_months)
         days_dirs = itertools.chain.from_iterable(results)
 
+    # The same process here.
+    selected_days = []
+    for item in days_dirs:
+        split_item = item.split("/")
+        if int(split_item[4]) == start_date.year:
+            if int(split_item[5]) >= start_date.month:
+                if int(split_item[6]) >= start_date.day:
+                    selected_days.append(item)
+        elif int(split_item[4]) == end_date.year:
+            if int(split_item[5]) <= end_date.month:
+                if int(split_item[6]) <= end_date.day:
+                    selected_days.append(item)
+        else:
+            selected_days.append(item)
+
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
-        results = executor.map(_ls_worker, days_dirs)
+        results = executor.map(_ls_worker, selected_days)
         version_dirs = itertools.chain.from_iterable(results)
 
     _info_worker = partial(get_s2_info, s2_bucket, full=full, s3=s3, request_pays=request_pays)
@@ -224,4 +236,8 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
 
 
 if __name__ == '__main__':
-    sentinel2(22, "K", "HV")
+    timing1 = 'sentinel2(22, "K", "HV")'
+    t = timeit.timeit(timing1, number=10, setup="from __main__ import sentinel2")
+    print(t)
+
+
