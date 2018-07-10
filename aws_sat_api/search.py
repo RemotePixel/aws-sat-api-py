@@ -6,7 +6,8 @@ import itertools
 import timeit
 from functools import partial
 from concurrent import futures
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
+from typing import Union
 
 from boto3.session import Session as boto3_session
 
@@ -147,9 +148,16 @@ def cbers(path, row, sensor='MUX'):
     return results
 
 
-def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None, end_date: datetime=None):
-    """Get Sentinel scenes.
+def sentinel2(utm: Union[str, int], lat: str, grid: str,
+              full: bool=False, level: str='l1c',
+              start_date: Union[date, datetime]=None, end_date: Union[date, datetime]=None):
+    """Get Sentinel 2 scenes.
 
+    :param utm: Grid zone designator.
+    :param lat: Latitude band.
+    :param grid: Grid square.
+    :param full: Full search.
+    :param level: Processing level ('l1c' or 'l2a').
     :param start_date: Start date in UTC.
     :param end_date: End date in UTC.
     """
