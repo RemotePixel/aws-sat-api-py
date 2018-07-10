@@ -187,10 +187,8 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
         results = executor.map(_ls_worker, prefixes)
         months_dirs = itertools.chain.from_iterable(results)
 
-    # This is a little bit of a hack, but works.
     # In the future we can optimize this process by making separate queries for
     # the start and end years.
-
     selected_months = []
     for item in months_dirs:
         split_item = item.split("/")
@@ -208,16 +206,20 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
         results = executor.map(_ls_worker, selected_months)
         days_dirs = itertools.chain.from_iterable(results)
 
-    # The same process here.
+    # Similar process here.
     selected_days = []
     for item in days_dirs:
         split_item = item.split("/")
         if int(split_item[4]) == start_date.year:
-            if int(split_item[5]) >= start_date.month:
+            if int(split_item[5]) > start_date.month:
+                selected_days.append(item)
+            elif int(split_item[5]) == start_date.month:
                 if int(split_item[6]) >= start_date.day:
                     selected_days.append(item)
         elif int(split_item[4]) == end_date.year:
-            if int(split_item[5]) <= end_date.month:
+            if int(split_item[5]) < end_date.month:
+                selected_days.append(item)
+            elif int(split_item[5]) == end_date.month:
                 if int(split_item[6]) <= end_date.day:
                     selected_days.append(item)
         else:
@@ -232,14 +234,4 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_info_worker, version_dirs)
 
-    print(len(list(results)))
-
     return results
-
-
-if __name__ == '__main__':
-    timing1 = 'sentinel2(22, "K", "HV")'
-    t = timeit.timeit(timing1, number=10, setup="from __main__ import sentinel2")
-    print(t)
-
-
