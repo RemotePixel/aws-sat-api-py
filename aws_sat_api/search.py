@@ -152,6 +152,9 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
               start_date: datetime=None, end_date: datetime=None):
     """Get Sentinel 2 scenes.
 
+    The start_date and end_date are optional.
+     If no date is defined the function will search images between 2015 and now.
+
     :param utm: Grid zone designator.
     :param lat: Latitude band.
     :param grid: Grid square.
