@@ -232,6 +232,8 @@ def sentinel2(utm, lat, grid, full=False, level='l1c', start_date: datetime=None
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_info_worker, version_dirs)
 
+    print(len(list(results)))
+
     return results
 
 
