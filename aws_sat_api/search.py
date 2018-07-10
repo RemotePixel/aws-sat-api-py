@@ -3,7 +3,6 @@
 import os
 import json
 import itertools
-import timeit
 from functools import partial
 from concurrent import futures
 from datetime import datetime, timezone, date
