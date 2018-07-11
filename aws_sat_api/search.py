@@ -5,7 +5,7 @@ import json
 import itertools
 from functools import partial
 from concurrent import futures
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone
 from typing import Union
 
 from boto3.session import Session as boto3_session
