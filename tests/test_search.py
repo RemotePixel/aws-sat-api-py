@@ -4,6 +4,7 @@ import os
 from datetime import date, datetime
 from io import BytesIO
 
+import pytest
 from mock import patch
 
 from aws_sat_api import search
@@ -463,3 +464,12 @@ def test_s2_date_filter():
     end_date = datetime(2017, 5, 15)
     results_date_filter = list(search.sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date))
     assert len(results_date_filter) == 22
+
+
+def test_s2_date_exceptions():
+    """Tests if the expected exceptions are properly raised."""
+    with pytest.raises(ValueError):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2014, 1, 1))
+
+    with pytest.raises(ValueError):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2017, 5, 1), end_date=datetime(2017, 1, 15))
