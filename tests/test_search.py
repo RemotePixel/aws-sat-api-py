@@ -468,8 +468,8 @@ def test_s2_date_filter():
 
 def test_s2_date_exceptions():
     """Tests if the expected exceptions are properly raised."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Start date out of range"):
         search.sentinel2(22, "K", "HV", start_date=datetime(2014, 1, 1))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid date range"):
         search.sentinel2(22, "K", "HV", start_date=datetime(2017, 5, 1), end_date=datetime(2017, 1, 15))
