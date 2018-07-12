@@ -42,4 +42,8 @@ setup(name='aws_sat_api',
       include_package_data=True,
       zip_safe=False,
       install_requires=inst_reqs,
-      extras_require=extra_reqs)
+      extras_require=extra_reqs,
+      entry_points="""
+        [console_scripts]
+        awssat=aws_sat_api.scripts.cli:awssat
+      """)

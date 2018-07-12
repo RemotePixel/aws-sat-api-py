@@ -14,7 +14,7 @@ Please see http://boto3.readthedocs.io/en/latest/guide/configuration.html to con
 pip install aws-sat-api
 ```
 
-# Usage
+### Usage
 
 ```Python
 
@@ -38,4 +38,44 @@ grid = 'DF'
 full_search = False
 level = 'l1c'
 s2_meta = sentinel2(utm, lat, grid, full_search, level)
+```
+
+
+### CLI
+
+```
+awssat --help
+Usage: awssat [OPTIONS] COMMAND [ARGS]...
+
+  Search.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  cbers     CBERS search CLI.
+  landsat   Landsat search CLI.
+  sentinel  Sentinel search CLI.
+```
+
+Example:
+
+Get Zoom 8 mercator tiles covering all landsat images for path/row 015/033 and 015/034
+```
+awssat landsat -pr 015-033,015-034 | jq -c '. | {"type": "Feature", "properties": {}, geometry: .geometry}' | fio collect | fio extent | supermercado burn 8 | xt -d'-'
+8-72-96
+8-73-96
+8-74-96
+8-72-97
+8-73-97
+8-74-97
+8-72-98
+8-73-98
+8-74-98
+8-72-99
+8-73-99
+8-74-99
+8-72-100
+8-73-100
+8-74-100
 ```
