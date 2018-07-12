@@ -200,6 +200,7 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
         results = executor.map(_ls_worker, months_dirs)
+        # print(list(results))
         days_dirs = itertools.chain.from_iterable(results)
 
     # Now, filter by date intervals.
