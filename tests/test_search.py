@@ -1,8 +1,10 @@
 """tests aws_sat_api.search"""
 
 import os
+from datetime import date, datetime
 from io import BytesIO
 
+import pytest
 from mock import patch
 
 from aws_sat_api import search
@@ -455,3 +457,19 @@ def test_cbers_awfi_valid(list_directory, session):
         'version': '4'}]
 
     assert list(search.cbers(path, row, sensor)) == expected
+
+
+def test_s2_date_filter():
+    start_date = datetime(2017, 1, 1)
+    end_date = datetime(2017, 5, 15)
+    results_date_filter = list(search.sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date))
+    assert len(results_date_filter) == 22
+
+
+def test_s2_date_exceptions():
+    """Tests if the expected exceptions are properly raised."""
+    with pytest.raises(ValueError, match="Start date out of range"):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2014, 1, 1))
+
+    with pytest.raises(ValueError, match="Invalid date range"):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2017, 5, 1), end_date=datetime(2017, 1, 15))

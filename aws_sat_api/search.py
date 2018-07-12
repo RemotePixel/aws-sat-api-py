@@ -6,6 +6,7 @@ import itertools
 from functools import partial
 from concurrent import futures
 from datetime import datetime, timezone
+from typing import Union
 
 from boto3.session import Session as boto3_session
 
@@ -146,16 +147,42 @@ def cbers(path, row, sensor='MUX'):
     return results
 
 
-def sentinel2(utm, lat, grid, full=False, level='l1c'):
-    """Get Sentinel scenes."""
+def sentinel2(utm: Union[str, int], lat: str, grid: str,
+              full: bool=False, level: str='l1c',
+              start_date: datetime=None, end_date: datetime=None):
+    """Get Sentinel 2 scenes.
+
+    The start_date and end_date are optional.
+     If no date is defined the function will search images between 2015 and now.
+
+    :param utm: Grid zone designator.
+    :param lat: Latitude band.
+    :param grid: Grid square.
+    :param full: Full search.
+    :param level: Processing level ('l1c' or 'l2a').
+    :param start_date: Start date in UTC.
+    :param end_date: End date in UTC.
+    """
     if level not in ['l1c', 'l2a']:
         raise Exception('Sentinel 2 Level must be "l1c" or "l2a"')
 
     s2_bucket = f'{sentinel_bucket}-{level}'
     request_pays = True
 
-    current_year = datetime.now(timezone.utc).year + 1
-    years = range(2015, current_year)
+    start_date = start_date or datetime(2015, 1, 1)
+    end_date = end_date or datetime.now(timezone.utc)
+
+    # Converts the time zone or sets a new tz for naive objects.
+    start_date = start_date.astimezone(timezone.utc)
+    end_date = end_date.astimezone(timezone.utc)
+
+    if start_date > end_date:
+        raise ValueError("Invalid date range (start_date > end_date).")
+
+    if start_date.year < 2015:
+        raise ValueError(f"Start date out of range {start_date.year} < 2015.")
+
+    years = range(start_date.year, end_date.year + 1)
 
     utm = str(utm).lstrip('0')
 
@@ -175,9 +202,16 @@ def sentinel2(utm, lat, grid, full=False, level='l1c'):
         results = executor.map(_ls_worker, months_dirs)
         days_dirs = itertools.chain.from_iterable(results)
 
+    # Now, filter by date intervals.
+    selected_days = []
+    for item in days_dirs:
+        item_date = datetime(*[int(i) for i in item.split("/")[4:7]], tzinfo=timezone.utc)
+        if start_date <= item_date <= end_date:
+            selected_days.append(item)
+
     _ls_worker = partial(aws.list_directory, s2_bucket, s3=s3, request_pays=request_pays)
     with futures.ThreadPoolExecutor(max_workers=max_worker) as executor:
-        results = executor.map(_ls_worker, days_dirs)
+        results = executor.map(_ls_worker, selected_days)
         version_dirs = itertools.chain.from_iterable(results)
 
     _info_worker = partial(get_s2_info, s2_bucket, full=full, s3=s3, request_pays=request_pays)
