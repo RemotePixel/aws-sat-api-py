@@ -3,6 +3,7 @@ Changelog
 2.0.0
 -----
 - Switch all Sentinel-2 bucket to `requester pays`
+- add date filter for sentinel2 search (#5)
 
 1.0.0
 -----
