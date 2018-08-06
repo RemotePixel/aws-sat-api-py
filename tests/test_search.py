@@ -1,8 +1,11 @@
 """tests aws_sat_api.search"""
 
 import os
+import json
 from io import BytesIO
+from datetime import date, datetime
 
+import pytest
 from mock import patch
 
 from aws_sat_api import search
@@ -455,3 +458,31 @@ def test_cbers_awfi_valid(list_directory, session):
         'version': '4'}]
 
     assert list(search.cbers(path, row, sensor)) == expected
+
+
+@patch('aws_sat_api.aws.list_directory')
+def test_s2_date_filter(list_directory):
+    start_date = datetime(2017, 1, 1)
+    end_date = datetime(2017, 5, 15)
+
+    path = os.path.join(os.path.dirname(__file__), f'fixtures/s2_search_2017.json')
+    with open(path, 'r') as f:
+        fixt = json.loads(f.read())
+
+    list_directory.side_effect = [
+        fixt["months"],
+        *fixt["days"],
+        *fixt["versions"]]
+
+    results_date_filter = list(search.sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date))
+    assert len(results_date_filter) == 22
+    assert results_date_filter == fixt["results"]
+
+
+def test_s2_date_exceptions():
+    """Tests if the expected exceptions are properly raised."""
+    with pytest.raises(ValueError, match="Start date out of range"):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2014, 1, 1))
+
+    with pytest.raises(ValueError, match="Invalid date range"):
+        search.sentinel2(22, "K", "HV", start_date=datetime(2017, 5, 1), end_date=datetime(2017, 1, 15))

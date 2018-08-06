@@ -1,5 +1,9 @@
 Changelog
 =========
+2.0.0
+-----
+- Switch all Sentinel-2 bucket to `requester pays`
+
 1.0.0
 -----
 - Including support for CBERS-4 AWFI, PAN10M and PAN5M sensors (fredliporace)
