@@ -25,7 +25,7 @@ def test_get_s2_info_valid(get_object):
 
     expected = {
         'acquisition_date': '20171009',
-        'browseURL': 'https://sentinel-s2-l1c.s3.amazonaws.com/tiles/38/S/NG/2017/10/9/1/preview.jpg',
+        'browseURL': 'https://roda.sentinel-hub.com/sentinel-s2-l1c/tiles/38/S/NG/2017/10/9/1/preview.jpg',
         'grid_square': 'NG',
         'latitude_band': 'S',
         'num': '1',
@@ -57,7 +57,7 @@ def test_get_s2_info_validFull(get_object):
 
     expected = {
         'acquisition_date': '20171009',
-        'browseURL': 'https://sentinel-s2-l1c.s3.amazonaws.com/tiles/38/S/NG/2017/10/9/1/preview.jpg',
+        'browseURL': 'https://roda.sentinel-hub.com/sentinel-s2-l1c/tiles/38/S/NG/2017/10/9/1/preview.jpg',
         'cloud_coverage': 5.01,
         'coverage': 36.52,
         'geometry': {
@@ -97,7 +97,7 @@ def test_get_s2_info_botoError(get_object):
 
     expected = {
         'acquisition_date': '20171009',
-        'browseURL': 'https://sentinel-s2-l1c.s3.amazonaws.com/tiles/38/S/NG/2017/10/9/1/preview.jpg',
+        'browseURL': 'https://roda.sentinel-hub.com/sentinel-s2-l1c/tiles/38/S/NG/2017/10/9/1/preview.jpg',
         'grid_square': 'NG',
         'latitude_band': 'S',
         'num': '1',
@@ -129,7 +129,7 @@ def test_get_s2_info_validFullPays(get_object):
 
     expected = {
         'acquisition_date': '20171009',
-        'browseURL': 'https://sentinel-s2-l1c.s3.amazonaws.com/tiles/38/S/NG/2017/10/9/1/preview.jpg',
+        'browseURL': 'https://roda.sentinel-hub.com/sentinel-s2-l1c/tiles/38/S/NG/2017/10/9/1/preview.jpg',
         'cloud_coverage': 5.01,
         'coverage': 36.52,
         'geometry': {

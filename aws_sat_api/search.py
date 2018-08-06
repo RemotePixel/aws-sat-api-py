@@ -41,7 +41,7 @@ def get_s2_info(bucket, scene_path, full=False, s3=None, request_pays=False):
         'grid_square': grid_square,
         'num': num,
         'acquisition_date': acquisition_date,
-        'browseURL': f'https://sentinel-s2-l1c.s3.amazonaws.com/{scene_path}preview.jpg'}
+        'browseURL': f'https://roda.sentinel-hub.com/sentinel-s2-l1c/{scene_path}preview.jpg'}
 
     utm = utils.zeroPad(info['utm_zone'], 2)
     info['scene_id'] = f'S2A_tile_{acquisition_date}_{utm}{latitude_band}{grid_square}_{num}'

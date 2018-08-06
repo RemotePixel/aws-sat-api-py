@@ -1,5 +1,9 @@
 Changelog
 =========
+2.0.1
+-----
+- Update sentinel-2 preview address
+
 2.0.0
 -----
 - Switch all Sentinel-2 bucket to `requester pays`
