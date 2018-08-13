@@ -1,5 +1,10 @@
 Changelog
 =========
+
+2.0.2
+-----
+- Fix Sentinel2 search for a single day interval. (#7)
+
 2.0.1
 -----
 - Update sentinel-2 preview address
