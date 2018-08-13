@@ -479,6 +479,25 @@ def test_s2_date_filter(list_directory):
     assert results_date_filter == fixt["results"]
 
 
+@patch('aws_sat_api.aws.list_directory')
+def test_s2_date_filter_single_day(list_directory):
+    start_date = datetime(2017, 1, 12)
+    end_date = datetime(2017, 1, 12)
+
+    path = os.path.join(os.path.dirname(__file__), f'fixtures/s2_search_2017.json')
+    with open(path, 'r') as f:
+        fixt = json.loads(f.read())
+
+    list_directory.side_effect = [
+        fixt["months"],
+        *fixt["days"],
+        *fixt["versions"]]
+
+    results_date_filter = list(search.sentinel2(22, "K", "HV", start_date=start_date, end_date=end_date))
+    assert len(results_date_filter) == 1
+    assert results_date_filter[0] == fixt["results"][0]
+
+
 def test_s2_date_exceptions():
     """Tests if the expected exceptions are properly raised."""
     with pytest.raises(ValueError, match="Start date out of range"):
