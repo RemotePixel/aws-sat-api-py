@@ -1,3 +1,6 @@
+:warning: Using this module could result in AWS charge (Sentinel-2 and CBERS buckets are requester-pays buckets) 
+
+
 # aws-sat-api-py
 Python port of https://github.com/RemotePixel/aws-sat-api
 
