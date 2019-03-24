@@ -169,7 +169,7 @@ def sentinel2(utm: Union[str, int], lat: str, grid: str,
     s2_bucket = f'{sentinel_bucket}-{level}'
     request_pays = True
 
-    start_date = start_date or datetime(2015, 1, 1)
+    start_date = start_date or datetime(2015, 1, 1, tzinfo=timezone.utc)
     end_date = end_date or datetime.now(timezone.utc)
 
     # Converts the time zone or sets a new tz for naive objects.
